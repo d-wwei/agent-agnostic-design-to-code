@@ -37,6 +37,8 @@ Without that layer:
 │   └── architecture.md
 ├── examples/
 │   └── marketing-homepage-hero/
+├── skills/
+│   └── design-to-code-runner/
 ├── specs/
 │   ├── component-map.template.json
 │   └── implementation-spec.template.yaml
@@ -54,6 +56,8 @@ Without that layer:
 4. Copy `specs/component-map.template.json` into a task-specific mapping file
 5. Copy `templates/acceptance-checklist.md` into a task-specific checklist
 6. Follow `workflows/agent-execution-sop.md`
+
+If your agent environment supports skills, use the included skill at `skills/design-to-code-runner` as the thin execution layer. The repository files remain the source of truth.
 
 ## Recommended Task Flow
 
