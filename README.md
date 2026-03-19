@@ -34,6 +34,7 @@ Without that layer:
 ├── LICENSE
 ├── README.md
 ├── docs/
+│   ├── agent-entry/
 │   └── architecture.md
 ├── examples/
 │   └── marketing-homepage-hero/
@@ -58,6 +59,12 @@ Without that layer:
 6. Follow `workflows/agent-execution-sop.md`
 
 If your agent environment supports skills, use the included skill at `skills/design-to-code-runner` as the thin execution layer. The repository files remain the source of truth.
+
+For minimal agent-specific launch points, see:
+
+- `docs/agent-entry/claude-code.md`
+- `docs/agent-entry/cursor.md`
+- `docs/agent-entry/openclaw.md`
 
 ## Recommended Task Flow
 
