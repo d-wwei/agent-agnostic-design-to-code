@@ -1,18 +1,99 @@
-# Design-to-Code MVP Scaffold
+# Agent-Agnostic Design-to-Code
 
-This repository is a minimal, agent-agnostic scaffold for design-to-code work.
+A minimal, open, repository-first scaffold for turning design intent into code with less drift across design tools, coding agents, and sessions.
+
+This repository is not a page generator.
+It is a workflow scaffold for teams or solo builders who want a stable middle layer between design input and implementation.
+
+## Why This Exists
+
+Most design-to-code failures are not caused only by lack of visual access.
+They happen because there is no stable execution layer between:
+
+`design input -> implementation spec -> component mapping -> execution -> acceptance`
+
+Without that layer:
+
+- agents improvise
+- repo defaults override design intent
+- the same input produces different outputs
+- fidelity is judged by vibe instead of evidence
 
 ## Core Rule
 
-- Raw design input is not the execution truth.
+- Raw design input is evidence.
 - The implementation spec is the execution truth.
-- A task is not complete until it passes the acceptance checklist.
+- The component map controls how design semantics land in the codebase.
+- A task is not complete until it passes acceptance.
+
+## Repository Structure
+
+```text
+.
+├── AGENTS.md
+├── LICENSE
+├── README.md
+├── docs/
+│   └── architecture.md
+├── examples/
+│   └── marketing-homepage-hero/
+├── specs/
+│   ├── component-map.template.json
+│   └── implementation-spec.template.yaml
+├── templates/
+│   └── acceptance-checklist.md
+└── workflows/
+    └── agent-execution-sop.md
+```
 
 ## Start Here
 
-1. Read `AGENTS.md`.
-2. Read `docs/architecture.md`.
-3. Copy the spec templates into a task folder or feature branch workflow.
-4. Fill the implementation spec and component map before coding.
-5. Follow `workflows/agent-execution-sop.md`.
-6. Use `templates/acceptance-checklist.md` before marking the task done.
+1. Read `AGENTS.md`
+2. Read `docs/architecture.md`
+3. Copy `specs/implementation-spec.template.yaml` into a task-specific spec file
+4. Copy `specs/component-map.template.json` into a task-specific mapping file
+5. Copy `templates/acceptance-checklist.md` into a task-specific checklist
+6. Follow `workflows/agent-execution-sop.md`
+
+## Recommended Task Flow
+
+1. Gather design input from any tool
+2. Fill the implementation spec
+3. Fill the component map
+4. Implement against the spec
+5. Review against the acceptance checklist
+6. Revise until acceptable
+
+## What "Testing" Means In This Repo
+
+This repository is a workflow scaffold, so the main test is operational:
+
+- can a real task be expressed cleanly in the spec?
+- can an agent implement from the spec instead of the screenshot?
+- can the acceptance checklist catch drift?
+
+Use your product repo's normal checks for implementation validation:
+
+- local preview
+- responsive inspection
+- screenshot comparison
+- automated tests
+- manual design review
+
+## First Example
+
+See `examples/marketing-homepage-hero/` for a filled sample task that shows:
+
+- a realistic implementation spec
+- a realistic component map
+- a realistic acceptance checklist
+
+## Who This Is For
+
+- solo builders using Codex, Claude Code, Cursor, or other agents
+- teams that want repository-first execution instead of prompt-only workflows
+- codebases where design fidelity matters and generic output is costly
+
+## License
+
+MIT. See `LICENSE`.
