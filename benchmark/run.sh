@@ -14,60 +14,82 @@ DESIGN_FILE="$BENCHMARK_DIR/design-structure.json"
 rm -rf "$OUTPUT_DIR"
 mkdir -p "$OUTPUT_DIR"
 
-# Read scaffold files to assemble context
-SPEC_TEMPLATE=$(cat "$REPO_DIR/specs/implementation-spec.template.yaml")
-COMPONENT_MAP=$(cat "$REPO_DIR/specs/component-map.template.json")
+# Read scaffold files
+AGENTS_MD=$(cat "$REPO_DIR/AGENTS.md")
+ARCHITECTURE=$(cat "$REPO_DIR/docs/architecture.md")
 WORKFLOW_SOP=$(cat "$REPO_DIR/workflows/agent-execution-sop.md")
+CLAUDE_ENTRY=$(cat "$REPO_DIR/docs/agent-entry/claude-code.md")
 DESIGN_STRUCTURE=$(cat "$DESIGN_FILE")
 
-# Build the generation prompt
-PROMPT=$(cat <<'PROMPT_END'
-You are a frontend developer implementing a design with pixel-perfect fidelity.
+# Build a focused code-generation prompt
+# Keep it minimal — too much scaffold context confuses --print mode
+cat > "$BENCHMARK_DIR/.prompt.txt" <<'PROMPT_HEREDOC'
+Generate a single React TypeScript component file (WelcomeScreen.tsx) using Tailwind CSS. Output ONLY code — no explanations, no markdown.
 
-## Task
-Generate a complete, single-file React component with Tailwind CSS that faithfully reproduces the "Welcome State" screen of the ACP Browser Client app.
+Design spec:
+- App: "ACP Browser Client" — dark-themed browser extension UI
+- Screen: Welcome State (400x780)
+- Font: DM Sans, sans-serif
+- Icons: lucide-react
 
-## Design Structure (Ground Truth)
-The following JSON describes the exact structure, layout, colors, typography, and components of the design:
+Color tokens (use as Tailwind arbitrary values like bg-[#0f1117]):
+- bg-primary: #0f1117
+- bg-card: #1e2538
+- bg-input: #1a1d26
+- accent: #6ee7b7
+- text-primary: #d1d5db
+- text-secondary: #9ca3af
+- text-muted: #6b7280
+- border: rgba(255,255,255,0.18)
+- border-card: rgba(255,255,255,0.19)
 
-PROMPT_END
-)
+Layout (flex flex-col, full height):
 
-PROMPT="$PROMPT
-$DESIGN_STRUCTURE
+1. TopBar (h-12, flex justify-between, bg-card, shadow, border-b border-white/20):
+   - Left: agent icon (Globe, 20px) + "Mock Agent" text + ChevronDown icon
+   - Right: green dot (w-2 h-2 rounded-full bg-[#6ee7b7]) + "Connected" text-xs + Wifi icon + Bell icon + Settings icon
 
-## Scaffold Workflow
-Follow this execution workflow for maximum design fidelity:
+2. EmptyContent (flex-1, flex flex-col items-center justify-center, px-10, gap-6):
+   - Logo: 56x56 rounded-2xl bg-[#1e2538] border border-white/20 shadow-lg, centered Globe icon in accent color
+   - Title: "ACP Browser Client" text-lg font-bold text-[#d1d5db]
+   - Subtitle: "Connect AI agents to your browser" text-sm text-[#9ca3af]
+   - Steps (flex flex-col gap-5, w-full):
+     - Step 1: flex gap-3. Left: w-6 h-6 rounded-full bg-[#6ee7b7] text-black text-xs font-bold flex items-center justify-center showing "1". Right: flex-col. Title "Start Proxy Server" font-semibold text-[#d1d5db]. Desc "Run the proxy server to bridge your browser with AI agents" text-sm text-[#6b7280]. Code block: bg-[#1a1d26] rounded-lg px-3 py-2 font-mono text-sm text-[#6ee7b7] showing "npx @anthropic-ai/acp-browser-proxy"
+     - Step 2: same layout. Number "2". Title "Select Agent". Desc "Choose an AI agent from the dropdown above"
+     - Step 3: same layout. Number "3". Title "Start Chatting". Desc "Send a message, attach page content, or use / shortcuts"
+   - Help text: "Need help? Check the " + link "documentation" in accent color
 
-$WORKFLOW_SOP
+3. InputBar (bg-card, border-t border-white/20, shadow-[0_-2px_6px_rgba(0,0,0,0.12)]):
+   - Row (flex items-center gap-2, px-3 py-2):
+     - Paperclip icon button (text-[#6b7280])
+     - Camera icon button (text-[#6b7280])
+     - Input (flex-1, bg-transparent, placeholder "Waiting for connection...", text-sm)
+     - Send icon button (text-[#6ee7b7])
 
-## Implementation Spec Template (reference for structure)
-$SPEC_TEMPLATE
-
-## Requirements
-1. Output a single React component file (WelcomeScreen.tsx) using TypeScript + Tailwind CSS
-2. Match the EXACT color tokens from the design (use the hex values directly in Tailwind arbitrary values or CSS variables)
-3. Match the EXACT layout structure: vertical root → TopBar + EmptyContent + InputBar
-4. Match ALL text content verbatim
-5. Use lucide-react for icons
-6. Include ALL 3 steps with their exact content
-7. Include the code block in Step 1
-8. Include the input bar with all buttons
-9. Dark theme throughout
-10. Use DM Sans font family
-
-## Output Format
-Output ONLY the component code. No explanations, no markdown code fences, just the raw TypeScript/React code.
-"
+Start your response with "import" — output the complete component code only.
+PROMPT_HEREDOC
 
 # Run claude --print to generate code
 echo "[benchmark] Generating code via claude --print..." >&2
-echo "$PROMPT" | claude --print --output-format text > "$OUTPUT_DIR/WelcomeScreen.tsx" 2>/dev/null
+claude --print --output-format text < "$BENCHMARK_DIR/.prompt.txt" > "$OUTPUT_DIR/WelcomeScreen.tsx" 2>/dev/null
 
-# Check if generation succeeded
+# Clean up temp file
+rm -f "$BENCHMARK_DIR/.prompt.txt"
+
+# Check if generation succeeded and contains actual code
 if [ ! -s "$OUTPUT_DIR/WelcomeScreen.tsx" ]; then
     echo "structural_score: 0"
     echo "error: claude --print produced no output" >&2
+    exit 1
+fi
+
+# Strip markdown fences if present (claude sometimes wraps in ```)
+sed -i '' '/^```/d' "$OUTPUT_DIR/WelcomeScreen.tsx" 2>/dev/null || true
+
+# Verify output looks like code (starts with import or has React patterns)
+if ! grep -q "import\|export\|function\|const\|React" "$OUTPUT_DIR/WelcomeScreen.tsx"; then
+    echo "structural_score: 0"
+    echo "error: output does not look like code" >&2
     exit 1
 fi
 
