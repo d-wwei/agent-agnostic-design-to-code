@@ -112,6 +112,37 @@ For each task:
 5. Review against the acceptance checklist.
 6. Revise until acceptable.
 
+## Known CSS Framework Pitfalls
+
+These failure modes were discovered through real-world usage and must be guarded against.
+
+### 1. CSS Variable Activation Chain Breakage
+
+A dark theme requires four layers to all connect:
+
+```
+HTML class (.dark) → CSS selector (.dark {}) → variable definition → component usage
+```
+
+Common failure: the HTML `<html>` element never receives the `.dark` class because:
+- macOS is in light mode and the inline script uses `matchMedia('prefers-color-scheme: dark')`
+- The theme store defaults to `'system'` which resolves to light
+- No `useEffect` syncs the store value back to the HTML class
+
+**Fix**: preset the HTML class at build time, set the store default explicitly, and add a runtime sync effect.
+
+### 2. Tailwind Utility Class Approximation Drift
+
+Design tools specify exact pixel values (e.g. `padding: [10, 12]`). Tailwind maps these to the nearest utility class (`py-2.5 px-3`), which may be 8px/12px instead of 10px/12px. Individual differences are small, but they accumulate across nested components, causing visible layout drift.
+
+**Fix**: use inline styles with exact pixel values from the design API (`style={{ padding: '10px 12px' }}`). Reserve Tailwind for non-fidelity-critical layout (flex, grid, display).
+
+### 3. React Fragment + `space-y-N` Pitfall
+
+Tailwind's `space-y-N` uses the CSS selector `> * + *` to add margin between children. When children are wrapped in React Fragments (`<>...</>`), the selector may not penetrate as expected, causing inconsistent spacing.
+
+**Fix**: avoid `space-y-N` with Fragment children. Use explicit `marginTop` or `gap` on each child instead.
+
 ## Scope of This MVP
 
 This scaffold is intentionally small.

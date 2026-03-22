@@ -62,7 +62,18 @@ Map each spec component to one of:
 
 Document rationale and forbidden substitutions. Existing repo components are not automatically correct; they are correct only when they preserve the intended hierarchy and behavior.
 
-### 5. Implement against the spec
+### 5. Extract exact parameters from design API
+
+Before implementation, query the design tool API (Pencil `batch_get`, Figma inspect, etc.) to extract:
+
+- exact hex/rgba color values
+- exact pixel values for padding, margin, gap, border-radius
+- exact font-size, line-height, font-weight
+- CSS variable names and per-theme values
+
+Record these in the implementation spec. Do not estimate from screenshots.
+
+### 6. Implement against the spec
 
 Treat the spec and component map as binding execution inputs.
 
@@ -70,10 +81,25 @@ Treat the spec and component map as binding execution inputs.
 - preserve hierarchy
 - avoid silent substitutions
 - update the task artifacts if implementation reality forces a change
+- **use inline styles with exact pixel values** for spacing, sizing, and colors when design fidelity is critical
+- **avoid Tailwind approximations** (e.g. `py-2.5` for 10px) — utility classes introduce cumulative drift
+- **avoid `space-y-N` with React Fragments** — use explicit margin or gap instead
 
 Keep prompts thin. The repository files should carry the detailed instructions.
 
-### 6. Run the acceptance loop
+### 7. Validate theme and CSS variable chain
+
+Before visual review, verify the full activation chain:
+
+1. HTML root has the correct theme class (e.g. `<html class="dark">`)
+2. CSS selectors (`.dark {}`) define all required variables
+3. Components consume `var(--name)`, not hardcoded colors
+4. Theme store default matches HTML class
+5. Runtime sync keeps HTML class and store aligned
+
+If any layer is broken, the theme will silently fail to activate.
+
+### 8. Run the acceptance loop
 
 Use the strongest checks available in the target repo:
 
@@ -85,7 +111,7 @@ Use the strongest checks available in the target repo:
 
 Then evaluate the result against the task acceptance checklist. Read [references/acceptance-loop.md](references/acceptance-loop.md) when you need the decision rules for pass, fail, and revision.
 
-### 7. Deliver with traceability
+### 9. Deliver with traceability
 
 Before finishing, ensure the repository contains:
 
