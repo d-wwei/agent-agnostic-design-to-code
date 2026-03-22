@@ -54,17 +54,17 @@ Layout (flex flex-col, full height):
    - Title: "ACP Browser Client" text-lg font-bold text-[#d1d5db]
    - Subtitle: "Connect AI agents to your browser" text-sm text-[#9ca3af]
    - Steps (flex flex-col gap-5, w-full):
-     - Step 1: flex gap-3. Left: w-6 h-6 rounded-full bg-[#6ee7b7] text-black text-xs font-bold flex items-center justify-center showing "1". Right: flex-col. Title "Start Proxy Server" font-semibold text-[#d1d5db]. Desc "Run the proxy server to bridge your browser with AI agents" text-sm text-[#6b7280]. Code block: bg-[#1a1d26] rounded-lg px-3 py-2 font-mono text-sm text-[#6ee7b7] showing "npx @anthropic-ai/acp-browser-proxy"
-     - Step 2: same layout. Number "2". Title "Select Agent". Desc "Choose an AI agent from the dropdown above"
-     - Step 3: same layout. Number "3". Title "Start Chatting". Desc "Send a message, attach page content, or use / shortcuts"
+     - Step 1: <div className="step-row flex flex-row gap-3 items-start">. Left: step number badge (w-6 h-6 rounded-full bg-[#6ee7b7] text-black text-xs font-bold flex items-center justify-center showing "1"). Right: flex-col. Title "Start Proxy Server" font-semibold text-[#d1d5db]. Desc "Run the proxy server to bridge your browser with AI agents" text-sm text-[#6b7280]. Code block: bg-[#1a1d26] rounded-lg px-3 py-2 font-mono text-sm text-[#6ee7b7] showing "npx @anthropic-ai/acp-browser-proxy"
+     - Step 2: same step-row flex-row layout with number badge. Number "2". Title "Select Agent". Desc "Choose an AI agent from the dropdown above"
+     - Step 3: same step-row flex-row layout with number badge. Number "3". Title "Start Chatting". Desc "Send a message, attach page content, or use / shortcuts"
    - Help text: "Need help? Check the " + link "documentation" in accent color
 
 3. InputBar (bg-card, border-t border-white/20, shadow-[0_-2px_6px_rgba(0,0,0,0.12)]):
    - Row (flex items-center gap-2, px-3 py-2):
-     - Paperclip icon button (text-[#6b7280])
-     - Camera icon button (text-[#6b7280])
+     - <button aria-label="attach" className="clipBtn text-[#6b7280]"><Paperclip /></button>
+     - <button aria-label="screenshot" className="text-[#6b7280]"><Camera /></button>
      - Input (flex-1, bg-transparent, placeholder "Waiting for connection...", text-sm)
-     - Send icon button (text-[#6ee7b7])
+     - <button aria-label="send" className="sendBtn text-[#6ee7b7]"><Send /></button>
 
 Start your response with "import" — output the complete component code only.
 PROMPT_HEREDOC
