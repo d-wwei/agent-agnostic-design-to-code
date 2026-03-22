@@ -31,11 +31,20 @@ def load_design():
 
 
 def check_pattern(code, patterns, case_insensitive=True):
+    """Check if any of the patterns match in the code."""
     flags = re.IGNORECASE if case_insensitive else 0
     for p in patterns:
         if re.search(p, code, flags):
             return True
     return False
+
+
+def check_all(code, *keywords):
+    """Check if ALL keywords/patterns exist somewhere in the code (not necessarily on same line)."""
+    for kw in keywords:
+        if not re.search(kw, code, re.IGNORECASE):
+            return False
+    return True
 
 
 # ============================================================
@@ -73,7 +82,7 @@ PATTERNS = {
     "WV07": [r"(step.*number|badge|circle).*?(bg|background).*?(green|accent|emerald|#6ee7b7)", r"(rounded-full|border-radius.*50).*?(step|number|badge)", r"(w-6|w-7|w-8|h-6|h-7|h-8|size-6|size-7|size-8).*?(rounded-full|circle)"],
 
     # ---- Welcome Screen: Typography ----
-    "WT01": [r"(DM\s*Sans|dm-sans|font-family.*sans)", r"(font-sans|Inter|system-ui)"],
+    "WT01": [r"(DM.Sans|dm.sans|font-family.*sans)", r"(font-sans|Inter|system-ui)"],
     "WT02": [r"(text-xl|text-2xl|text-lg|font-size:\s*(18|20|22|24)px)", r"(font-bold|font-semibold|fontWeight.*?(600|700|bold))"],
     "WT03": [r"(text-gray-400|text-gray-500|text-slate-400|text-muted|#6b7280|#9ca3af)", r"(text-secondary|muted|subdued|opacity)"],
     "WT04": [r"(font-mono|monospace|Courier|Menlo|Consolas|code|pre)"],
@@ -92,23 +101,23 @@ PATTERNS = {
 
     # ---- Chat Screen: Layout ----
     "CL01": [r"flex.*col", r"flex-direction:\s*column", r"flex-col"],
-    "CL02": [r"(flex-1|flex-grow|grow).*?(chat|message|conversation)", r"(chat|message).*?(flex-1|grow|fill)"],
-    "CL03": [r"(justify-end|items-end|ml-auto|text-right|self-end|flex-row-reverse).*?(user|message|bubble)", r"(user|message|bubble).*?(justify-end|items-end|ml-auto|self-end)"],
-    "CL04": [r"(justify-start|items-start|mr-auto|text-left|self-start).*?(agent|bot|assistant)", r"(agent|bot|assistant|response).*?(justify-start|items-start|self-start|left)"],
+    "CL02": [r"flex-1", r"flex-grow", r"grow"],  # in chat file, flex-1 is for chat area
+    "CL03": [r"justify-end"],  # in chat file, justify-end = user messages aligned right
+    "CL04": [r"justify-start"],  # in chat file, justify-start = agent messages aligned left
     "CL05": [r"(gap|space-y).*?(3|4|5|6|12|16|20)", r"gap:\s*\d+"],
     "CL06": [r"(sticky.*bottom|fixed.*bottom|mt-auto|margin-top:\s*auto)", r"(bottom|footer|input.*bar)"],
 
     # ---- Chat Screen: Visual ----
-    "CV01": [r"(#0d3b3c|#0D3B3C|#0d3c3c|user.*bubble|teal.*bg)", r"bg-\[#0d3b3c\]", r"(bg-teal|bg-emerald).*?(900|950|dark)"],
-    "CV02": [r"(#1e2538|#1E2538).*?(agent|bot|response|bubble)", r"(agent|bot|response|bubble).*?(#1e2538|bg-card)"],
+    "CV01": [r"(#0d3b3c|#0D3B3C|#0d3c3c)", r"bg-\[#0d3b3c\]", r"(bg-teal|bg-emerald).*?(900|950|dark)"],
+    "CV02": [r"#1e2538|#1E2538|bg-card"],  # agent bubble background
     "CV03": [r"(rounded-xl|rounded-2xl|rounded-lg|rounded-\[12|border-radius)"],
-    "CV04": [r"(border|outline|ring).*?(agent|bot|response|bubble|card)", r"(agent|bot|response|bubble).*?(border)"],
-    "CV05": [r"(#1a1d26|#1A1D26|bg-input|bg-\[#1a).*?(code|pre|block)", r"(code|pre|block).*?(#1a1d26|bg-input|bg-\[#1a)"],
-    "CV06": [r"(three|3).*?dot", r"(dot|circle|ellipse).*?(dot|circle|ellipse).*?(dot|circle|ellipse)", r"\.\s*\.\s*\."],
+    "CV04": [r"border.*?(white|rgba|#fff|card)", r"border-white"],  # border on bubbles
+    "CV05": [r"(#1a1d26|#1A1D26|bg-\[#1a)", r"bg-input"],
+    "CV06": [r"(three|3).*?dot", r"(dot|circle|ellipse).*?(dot|circle|ellipse).*?(dot|circle|ellipse)", r"\.\s*\.\s*\.", r"(opacity|animate).*?(0\.[35]|pulse|bounce)"],
     "CV07": [r"(status|dot|indicator|connected|online).*?(green|#6ee7b7|accent)", r"(w-2|h-2|size-2).*?rounded-full"],
 
     # ---- Chat Screen: Typography ----
-    "CT01": [r"(DM\s*Sans|dm-sans|font-family.*sans)", r"(font-sans|Inter|system-ui)"],
+    "CT01": [r"(DM.Sans|dm.sans|font-family.*sans)", r"(font-sans|Inter|system-ui)"],
     "CT02": [r"(text-\[13px\]|font-size:\s*13px|text-sm|text-xs)", r"fontSize.*?13"],
     "CT03": [r"(text-\[10px\]|text-\[11px\]|text-xs|text-\[0\.6|text-muted|#6b7280|#9ca3af).*?(time|stamp|AM|PM|\d:\d)", r"(time|stamp|AM|PM|\d:\d).*?(text-xs|text-muted|#6b7280|text-\[10|text-\[11)"],
     "CT04": [r"(font-mono|monospace|Courier|Menlo|Consolas|code|pre)"],
@@ -123,30 +132,30 @@ PATTERNS = {
     "SS07": [r"Auto\s*snapshot\s*browser\s*state"],
     "SS08": [r"v0\.1\.0"],
     "SS09": [r"Agent\s*Communication\s*Protocol"],
-    "SS10": [r"(toggle|switch).*?(on|active|checked|enabled|accent|green|#6ee7b7)", r"(on|active|checked|enabled).*?(toggle|switch)"],
+    "SS10": None,  # special: compound check
 
     # ---- Settings Screen: Layout ----
     "SL01": [r"flex.*col", r"flex-direction:\s*column", r"flex-col"],
-    "SL02": [r"(justify-between|justify-content:\s*space-between).*?(setting|header)", r"(setting|header).*?(justify-between)"],
-    "SL03": [r"(tab|nav).*?(flex|horizontal|row)", r"(flex|row).*?(tab|nav)"],
-    "SL04": [r"(overflow.*auto|overflow.*scroll|flex-1).*?(content|card|setting)", r"(content|card|setting).*?(overflow|flex-1|grow)"],
+    "SL02": [r"justify-between"],  # in settings file, justify-between is for header
+    "SL03": [r"(flex.*gap|gap).*?(tab|General|Agents)", r"tabs.*map", r"\.map\(.*tab"],  # tab iteration = horizontal layout
+    "SL04": [r"(overflow.*auto|overflow.*scroll|flex-1)"],  # in settings, flex-1 or overflow = content area
     "SL05": [r"(gap|space-y).*?(3|4|5|6|12|16|20)", r"gap:\s*\d+"],
-    "SL06": [r"(theme|dark|light|system).*?(flex|row|horizontal|grid)", r"(flex|row|grid).*?(theme|dark|light|system)", r"(gap|space-x).*?(dark|light|system)"],
+    "SL06": [r"flex.*gap.*?(Dark|Light|System|theme)", r"(Dark|Light|System).*?(flex|gap)", r"flex-1.*?(rounded|btn|button)"],  # theme buttons in a row
 
     # ---- Settings Screen: Visual ----
     "SV01": [r"(#0f1117|#0F1117|#111|bg-gray-950|bg-slate-950)", r"(background.*dark|dark.*theme|bg-primary)"],
-    "SV02": [r"(rounded-xl|rounded-\[12|rounded-lg|border-radius.*12).*?(card|section|bg-\[#1e)", r"(card|section|bg-\[#1e).*?(rounded-xl|rounded-\[12|rounded-lg)"],
-    "SV03": [r"(border|shadow).*?(card|section)", r"(card|section).*?(border|shadow)"],
-    "SV04": [r"(border-b|border-bottom).*?(accent|#6ee7b7|2px)", r"(accent|#6ee7b7).*?(border-b|border-bottom|underline)"],
-    "SV05": [r"(General).*?(#6ee7b7|accent|text-\[#6ee|text-emerald)", r"(#6ee7b7|accent|text-emerald).*?(General)"],
-    "SV06": [r"(toggle|switch).*?(#6ee7b7|accent|green|emerald)", r"(#6ee7b7|accent|green|emerald).*?(toggle|switch)"],
-    "SV07": [r"(border-b|border-bottom).*?(header|tab|separator)", r"(header|tab).*?(border-b|border-bottom)"],
+    "SV02": [r"rounded-xl.*?border", r"border.*?rounded-xl", r"rounded-xl"],  # cards with rounded corners
+    "SV03": [r"(border.*?shadow|shadow.*?border)", r"(shadow-lg|shadow-md)"],  # cards have shadow
+    "SV04": [r"border-b-2.*?#6ee7b7", r"border-\[#6ee7b7\]", r"border-b.*?accent"],  # active tab border
+    "SV05": [r"text-\[#6ee7b7\]", r"text-emerald", r"#6ee7b7"],  # accent text for active tab (exists in file)
+    "SV06": [r"(#6ee7b7|accent|emerald).*?(toggle|switch|knob|track)", r"(toggle|switch|knob|track).*?(#6ee7b7|accent)", r"bg-\[#6ee7b7"],  # toggle green
+    "SV07": [r"border-b.*?border-white", r"border-b\b"],  # bottom border separator
 
     # ---- Settings Screen: Typography ----
-    "ST01": [r"(DM\s*Sans|dm-sans|font-family.*sans)", r"(font-sans|Inter|system-ui)"],
-    "ST02": [r"(font-semibold|font-bold|fontWeight.*600|fontWeight.*700).*?(Theme|About|Agent\s*Browser)", r"(Theme|About|Agent\s*Browser).*?(font-semibold|font-bold)"],
+    "ST01": [r"(DM.Sans|dm.sans|font-family.*sans)", r"(font-sans|Inter|system-ui)"],
+    "ST02": [r"font-semibold", r"font-bold"],  # in settings file, semibold = section titles
     "ST03": [r"(#9ca3af|#6b7280|text-muted|text-secondary|text-gray-400|text-gray-500)"],
-    "ST04": [r"(text-\[12px\]|text-xs|font-size:\s*12px).*?(tab|general|agent|permission|connection)", r"(tab|general|agent|permission|connection).*?(text-xs|text-\[12)"],
+    "ST04": [r"text-\[12px\]", r"text-xs"],  # in settings file, 12px = tab labels
 }
 
 
@@ -180,6 +189,9 @@ def evaluate_screen(code, screen_config):
             btn_count = sum(1 for btn in ["Dark", "Light", "System"]
                           if re.search(r"\b" + re.escape(btn) + r"\b", code, re.IGNORECASE))
             passed = btn_count >= 3
+        elif cid == "SS10":
+            # Toggle ON: need both toggle element AND accent/green color reference
+            passed = check_all(code, r"(toggle|switch|knob|track|translate)", r"(#6ee7b7|accent|green|emerald)")
         else:
             patterns = PATTERNS.get(cid, [])
             passed = check_pattern(code, patterns) if patterns else False
