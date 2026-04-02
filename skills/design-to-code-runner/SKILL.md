@@ -44,10 +44,12 @@ Before any implementation, identify the design source type and extract specifica
 
 - **Image files** (PNG/JPG/PDF): Prepare multi-resolution versions (tiny 400px, compressed 600px, original). Identify all distinct views/screens. Determine target viewport dimensions.
 - **Existing HTML/CSS**: Read the code directly to extract design tokens (colors, spacing, fonts, layout patterns). This is the most precise source — do not guess what you can read.
-- **Figma**: Use MCP tools — `get_design_context` for code + screenshot, `get_metadata` for structure, `get_variable_defs` for tokens, `search_design_system` for reusable components.
+- **Figma**: Use MCP tools — `get_design_context` for code + screenshot, `get_metadata` for structure, `get_variable_defs` for tokens, `search_design_system` for reusable components. Note: Figma MCP ecosystem includes the official Figma MCP (15+ tools, OAuth, read+write), Framelink/GLips `figma-developer-mcp` (2 tools: `get_figma_data` + `download_figma_images`, API key, read-only), and enterprise forks with custom component recognition. Detect which MCP is available and adapt extraction accordingly.
 - **Paper (.pen files)**: Use MCP tools — `batch_get` for node data, `get_computed_styles` for exact CSS values, `get_screenshot` for visual reference, `get_jsx` for code representation.
 
-Do not skip this step. The source type determines the precision of everything that follows. Read [references/design-source-preprocessing.md](references/design-source-preprocessing.md) for the detailed extraction protocol per source type.
+After identifying the source, run a **design source quality rating** — assess the precision level and flag limitations before implementation begins. This prevents over-iterating on unreliable data.
+
+Do not skip this step. The source type determines the precision of everything that follows. Read [references/design-source-preprocessing.md](references/design-source-preprocessing.md) for the detailed extraction protocol per source type, including the quality rating rubric.
 
 ### 1. Discover the repository contract
 
@@ -61,6 +63,14 @@ Preferred files:
 - task-specific `component-map.json`
 - `workflows/agent-execution-sop.md`
 - task-specific `acceptance-checklist.md`
+
+Also check for **project-level generation rules**. These are optional files that override or extend the default code generation behavior for a specific project:
+
+- `.design-to-code/rules.md` — project-specific prompt rules (e.g. "always use CSS modules", "prefer rem over px", "wrap all components in forwardRef")
+- `.design-to-code/component-map.json` — project-specific component mapping (Figma component names → codebase widget names, with parseChild/icon flags)
+- `.figma-to-code/custom_rules.md` — alternative convention (check both paths)
+
+When a project-level rules file exists, load it before implementation and treat it as additional constraints alongside the implementation spec. Project rules take precedence over skill defaults but not over explicit user instructions.
 
 If the repo does not use these exact paths, search for equivalent files first. Read [references/file-discovery.md](references/file-discovery.md) when path discovery is ambiguous.
 

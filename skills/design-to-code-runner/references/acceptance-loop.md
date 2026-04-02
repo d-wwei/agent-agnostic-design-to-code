@@ -39,6 +39,61 @@ See [fidelity-loop.md](fidelity-loop.md) for the full single-variable experiment
 
 Run when the fidelity loop has stabilized. This is the formal acceptance gate.
 
+## Quantitative metrics
+
+Track these three metrics throughout the task. They provide an objective complement to qualitative visual review.
+
+### 1. Visual fidelity score (%)
+
+Region-by-region assessment of how closely the implementation matches the design.
+
+| Score range | Meaning |
+|-------------|---------|
+| 90–100% | Pixel-perfect or near-perfect — differences invisible at compressed resolution |
+| 75–89% | High fidelity — structure and rhythm correct, minor spacing/color drift |
+| 50–74% | Medium fidelity — layout correct but noticeable visual differences |
+| < 50% | Low fidelity — significant structural or visual divergence |
+
+How to estimate: after each fidelity loop round, rate each region (header, main, sidebar, footer, modals) on a 1–5 scale. Average across regions, multiply by 20 to get a percentage. Record in the fidelity progress TSV.
+
+### 2. Component mapping accuracy (%)
+
+Percentage of design components that were correctly mapped to code counterparts.
+
+```
+accuracy = (components correctly mapped / total components in spec) × 100
+```
+
+A component is "correctly mapped" when:
+- it uses the specified repo component (or justified primitive composition)
+- it preserves the intended hierarchy and behavior
+- no silent substitutions were made
+
+Target: 100%. Any gap should be documented in the component map with explicit rationale.
+
+### 3. Design token coverage (%)
+
+Percentage of design-specified tokens (colors, spacing, typography, borders) that are used in the implementation instead of hardcoded or approximated values.
+
+```
+coverage = (tokens used from design system / total style values in implementation) × 100
+```
+
+How to check: search the implementation for hardcoded color hex values, magic-number pixel values, and inline font specifications that should reference design tokens. Each hardcoded value that has a corresponding design token is a coverage miss.
+
+Target: 95%+ for API-sourced designs (Figma/Paper), 80%+ for image-sourced designs.
+
+### Recording metrics
+
+Add a metrics summary to the acceptance checklist or fidelity progress log:
+
+```
+## Metrics Summary
+- Visual fidelity: 87% (header 95%, main 90%, sidebar 80%, footer 85%)
+- Component mapping: 100% (12/12 components mapped)
+- Design token coverage: 92% (3 hardcoded values remain — documented in spec)
+```
+
 ## Final review order
 
 1. Structural fidelity

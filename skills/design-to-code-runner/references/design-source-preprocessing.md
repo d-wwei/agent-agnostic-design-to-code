@@ -124,6 +124,16 @@ Transfer all extracted values into the implementation spec's design tokens secti
 
 Use Figma MCP tools for precise extraction without manual inspection.
 
+**MCP ecosystem awareness**: Multiple Figma MCPs exist with different capabilities:
+
+| MCP variant | Tools | Auth | Notes |
+|-------------|-------|------|-------|
+| Official Figma MCP (remote) | 15+ (`get_design_context`, `get_screenshot`, `get_metadata`, `use_figma`, etc.) | OAuth2 | Full read+write, design system search, Code Connect |
+| Framelink / GLips `figma-developer-mcp` | 2 (`get_figma_data`, `download_figma_images`) | API key | Read-only, YAML output optimized for LLM consumption |
+| Enterprise forks (e.g. `@org/figma-developer-mcp`) | 2+ (base + custom) | API key | May add internal component recognition |
+
+Detect which MCP is available before planning extraction. If only Framelink is available, you won't have `get_variable_defs` or `search_design_system` — extract tokens manually from the returned design data instead.
+
 ### Step 1: Get structure overview
 
 ```
@@ -217,6 +227,53 @@ get_screenshot({nodeId})
 5. `get_jsx` on complex sections → get reference code
 6. `get_screenshot` on each artboard → save as comparison references
 
+## Design source quality rating
+
+After extraction, rate the design source quality before implementation begins. This prevents wasted effort iterating on unreliable data.
+
+### Rating rubric
+
+| Grade | Criteria | Expected fidelity ceiling | Iteration strategy |
+|-------|----------|--------------------------|-------------------|
+| **A — Production-ready** | API source (Figma/Paper) with complete design tokens, named components, consistent naming conventions, and comprehensive state variants | 95%+ | Extract exact values; iterate on polish only |
+| **B — Structured** | API source with partial tokens, or well-structured HTML/CSS with design system | 85–95% | Extract what's available; iterate on gaps in fidelity loop |
+| **C — Visual-only** | High-res images with clear layout, consistent spacing, readable typography | 70–85% | Approximate from vision; expect significant fidelity loop iteration |
+| **D — Incomplete** | Low-res images, partial screens, missing states, inconsistent design | 50–70% | Set expectations with user; focus on structure over pixel precision |
+
+### Quality signals to check
+
+**Positive signals** (raise the grade):
+- Design tokens / CSS variables are defined and used consistently
+- Components are named and structured (not flattened groups)
+- All interaction states are represented (hover, active, disabled, error, empty)
+- Typography hierarchy is explicit (heading/body/label/caption levels)
+- Spacing is systematic (consistent padding/gap multiples)
+
+**Negative signals** (lower the grade):
+- Flattened/rasterized layers without structure
+- Inconsistent spacing (different padding in similar components)
+- Missing states (only default state shown)
+- Hardcoded one-off values instead of token references
+- Complex components exported as single images
+- Design data too large for AI to fully parse (common with deeply nested Figma components)
+
+### Recording the rating
+
+Add the quality rating to the implementation spec:
+
+```yaml
+design_source:
+  type: figma  # or image, html, paper
+  quality_grade: B
+  quality_notes: "Tokens defined for colors but not spacing. Navigation component is flattened. Missing error states for form inputs."
+  precision_limits:
+    - "Spacing values approximate — iterate in fidelity loop"
+    - "Nav component requires manual decomposition"
+  expected_fidelity_ceiling: 90%
+```
+
+This rating informs iteration strategy: for grade A/B sources, target the ceiling aggressively. For grade C/D sources, align with the user on acceptable fidelity before deep iteration — diminishing returns set in earlier.
+
 ## Output
 
 After preprocessing, you should have:
@@ -226,5 +283,6 @@ After preprocessing, you should have:
 3. Multi-resolution reference images (for image sources) or saved screenshots (for API sources)
 4. Target viewport dimensions
 5. Component structure mapped
+6. **Design source quality rating** with precision limits documented
 
 Only then proceed to step 1 of the main workflow (discover repository contract).
