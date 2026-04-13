@@ -12,9 +12,7 @@ Every coding agent should follow this order:
 4. Read `workflows/agent-execution-sop.md`
 5. Use `templates/acceptance-checklist.md` as the completion gate
 
-If your environment supports skills, prefer using the repository skill at:
-
-- `skills/design-to-code-runner`
+If your environment supports skills, the `SKILL.md` at the repository root is the entry point.
 
 ## Non-Negotiable Rules
 

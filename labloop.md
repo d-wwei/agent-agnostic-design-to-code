@@ -12,8 +12,8 @@
 - `specs/component-map.template.json`
 - `workflows/agent-execution-sop.md`
 - `templates/acceptance-checklist.md`
-- `skills/design-to-code-runner/SKILL.md`
-- `skills/design-to-code-runner/references/*.md`
+- `SKILL.md`
+- `references/*.md`
 - `docs/architecture.md`
 - `docs/agent-entry/claude-code.md`
 - `AGENTS.md`

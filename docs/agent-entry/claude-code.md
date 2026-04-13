@@ -48,9 +48,7 @@ Rules:
 
 ## If You Are Using The Repository Skill
 
-If Claude Code supports explicit skill-style invocation in your setup, point it at:
-
-- `skills/design-to-code-runner`
+If Claude Code supports explicit skill-style invocation in your setup, the `SKILL.md` at the repository root is the entry point.
 
 The skill should remain a thin execution layer. The repository files are still the source of truth.
 

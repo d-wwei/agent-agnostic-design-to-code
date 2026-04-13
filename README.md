@@ -58,7 +58,7 @@ Without that layer:
 5. Copy `templates/acceptance-checklist.md` into a task-specific checklist
 6. Follow `workflows/agent-execution-sop.md`
 
-If your agent environment supports skills, use the included skill at `skills/design-to-code-runner` as the thin execution layer. The repository files remain the source of truth.
+If your agent environment supports skills, the `SKILL.md` at the repository root is the entry point. The repository files remain the source of truth.
 
 For minimal agent-specific launch points, see:
 

@@ -60,7 +60,7 @@ If the repository contains:
 You can run:
 
 ```bash
-python3 skills/design-to-code-runner/scripts/bootstrap_task.py \
+python3 scripts/bootstrap_task.py \
   --repo-root /path/to/repo \
   --task-dir /path/to/repo/tasks/my-task
 ```
